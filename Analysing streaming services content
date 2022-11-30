@@ -1,0 +1,95 @@
+SELECT * FROM amazon   --Exploring the amazon table
+SELECT * FROM hulu     -- explore the hulu table
+SELECT * FROM netflix   --exploring the the netflix table
+SELECT * FROM disney    --exploring the disney table
+SELECT * FROM genres    --explore the genres table
+
+
+SELECT *FROM amazon     -- joining the my tables since they all contain the same data, using union all to preserve any possible duplicates
+UNION ALL
+SELECT * FROM hulu
+UNION ALL
+SELECT * FROM netflix
+UNION ALL
+SELECT * FROM disney
+
+
+SELECT *, 'amazon' AS service FROM amazon   -- above effort removed the streaming service information, joining tables and adding steaming service column
+UNION
+SELECT *, 'hulu' AS service FROM hulu
+UNION
+SELECT *, 'netflix' AS service FROM netflix
+UNION
+SELECT *, 'disney' AS service FROM disney
+
+
+/* creating a Common Table Expression called service_data for my combined streaming services */
+
+WITH service_data AS (                    
+	SELECT *, 'amazon' AS service
+    FROM amazon
+    UNION
+    SELECT *, 'hulu' AS service
+    FROM hulu
+    UNION
+    SELECT *, 'netflix' AS service
+    FROM netflix
+    UNION
+    SELECT *, 'disney' AS service
+    FROM disney )         
+
+SELECT *FROM service_data AS sd     --adding the genre information to the combined streaming services table
+LEFT JOIN genres AS g
+	ON sd.title = g.film
+  
+  
+
+
+WITH service_data AS (
+	SELECT *, 'amazon' AS service FROM amazon
+  UNION
+  SELECT *, 'hulu' AS service FROM hulu
+  UNION
+  SELECT *, 'netflix' AS service FROM netflix
+  UNION
+  SELECT *, 'disney' AS service FROM disney ),
+
+all_data AS (
+    SELECT *
+    FROM service_data AS sd
+    LEFT JOIN genres AS g
+        ON sd.title = g.film )
+
+SELECT * FROM all_data                           --filtering the family friendly content
+WHERE genre ILIKE '%kids%' 
+    OR genre ILIKE '%family%' 
+    OR genre ILIKE '%children%'
+    
+    
+    
+    
+WITH service_data AS (
+	SELECT *, 'amazon' AS service FROM amazon
+  UNION
+  SELECT *, 'hulu' AS service FROM hulu
+  UNION
+  SELECT *, 'netflix' AS service FROM netflix
+  UNION
+  SELECT *, 'disney' AS service FROM disney ),
+
+all_data AS (
+    SELECT *
+    FROM service_data AS sd
+    LEFT JOIN genres AS g
+        ON sd.title = g.film )
+
+/*analysing which streaming sevice has the highest family friendly content service*/
+SELECT                                       
+    AVG(CASE WHEN genre ILIKE '%kids%' 
+        OR genre ILIKE '%family%' 
+        OR genre ILIKE '%children%' THEN 1.0000 ELSE 0.0000 END) * 100 AS pct_family
+FROM all_data
+GROUP BY service
+ORDER BY pct_family DESC
+
+
